@@ -1,7 +1,5 @@
 <script>
-  import { enhance } from "$app/forms";
-  import { page } from "$app/stores";
-  import { capitalize } from "$lib/utils";
+  import { enhance } from '$app/forms';
 
   /** @type {import('./$types').PageData} */
   export let data;
@@ -26,7 +24,12 @@
     <label for="postal" class="label">
       <span class="label-text">Postal</span>
     </label>
-    <input name="postal" type="text" class="input input-bordered w-full max-w-sm" class:input-error={form?.errors?.postal} />
+    <input
+      name="postal"
+      type="text"
+      class="input input-bordered w-full max-w-sm"
+      class:input-error={form?.errors?.postal}
+    />
     {#if form?.errors?.postal}
       <div class="label">
         <span class="label-text-alt text-error">Please enter your postal</span>
@@ -38,7 +41,12 @@
     <label for="city" class="label">
       <span class="label-text">City</span>
     </label>
-    <input name="city" type="text" class="input input-bordered w-full max-w-sm" class:input-error={form?.errors?.city} />
+    <input
+      name="city"
+      type="text"
+      class="input input-bordered w-full max-w-sm"
+      class:input-error={form?.errors?.city}
+    />
     {#if form?.errors?.city}
       <div class="label">
         <span class="label-text-alt text-error">Please enter your city</span>
