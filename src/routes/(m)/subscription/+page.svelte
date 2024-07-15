@@ -1,24 +1,12 @@
-<script>
+<!-- <script>
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
-  import { subscription } from '$lib/stores/subscription';
 
   /** @type {import('./$types').PageData} */
-  export let data;
+  // export let data;
 
   /** @type {import('./$types').ActionData} */
   export let form;
-
-  if (form?.success) {
-    console.log('saving...');
-    subscription.set({
-      ...$subscription,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      nrn: data.user.nrn,
-      email: data.user.email,
-    });
-  }
 </script>
 
 <main class="card col-span-2 bg-base-100 shadow-lg">
@@ -82,4 +70,4 @@
       </div>
     {/if}
   </div>
-</main>
+</main> -->

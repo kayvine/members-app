@@ -1,8 +1,10 @@
 import { redirect } from '@sveltejs/kit';
- 
+
 /** @type {import('./$types').LayoutServerLoad} */
-export function load({ locals }) {
-  if (locals.user?.nrn && locals.user?.verified) {
-    throw redirect(307, '/dashboard');
+export async function load({ parent }) {
+  const { session } = await parent();
+
+  if (session) {
+    throw redirect(302, '/dashboard');
   }
 }

@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
 
   if (browser) {
-    goto('/intro');
+    goto('/login');
   }
 </script>
 

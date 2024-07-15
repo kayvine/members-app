@@ -1,55 +1,57 @@
 import { fail, redirect } from '@sveltejs/kit';
 
-/** @type {import('./$types').PageServerLoad} */
-export function load({ locals }) {
-  return { user: locals.user };
-}
-
 /** @type {import('./$types').Actions} */
 export const actions = {
-  default: async ({ cookies, request, locals, url }) => {
-    const data = await request.formData();
-    const email = data.get('email');
- 
-    if (!email) {
+  oidc: async ({ fetch }) => {
+    const response = await fetch('/api/oidc');
+
+    if (response.status !== 200) {
+      return { error: true };
+    }
+
+    const user = await response.json();
+
+    return { user };
+  },
+  login: async ({ cookies, locals: { supabase }, request }) => {
+    const formData = Object.fromEntries(await request.formData());
+    const email = formData.email.toString();
+    const metadata = formData.metadata && JSON.parse(formData.metadata.toString());
+
+    if (!email.length) {
+      console.log('fail', formData);
       return fail(400, { missing: true });
     }
 
     const validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.(?:[a-zA-Z0-9-]+)*$/;
-    const emailAsString = email + '';
-    if (!emailAsString.match(validRegex)) {
+    if (!email.match(validRegex)) {
       return fail(400, { email, invalid: true });
     }
 
-    // TODO: find the user by email and check if NRN
-
-    const user = locals.user || {};
-    if (user?.nrn) {
-      // NRN
-      console.log('We will find the user by NRN and save the email if non exist');
-      // note: user from DB can already have a confirmed email, to be handled...
-    } else {
-      // No NRN
-      // Find user by email (user should have NRN & confirmed email, if not send the user to CSAM)
-      console.log('We will find the user by email (and handle exceptions later)');
-      // Give fake NRN for now
-      user.nrn = '000000000000';
+    console.log(`[server '/login'] Metadata: ${JSON.stringify(metadata, null, 2)}`);
+    if (!metadata?.nrn) {
+      // The user did not pass through FAS/CSAM auth so they should have an existing user.
+      //  If not, we need to send them there at some point
     }
 
-    // At this point we have a new or returning user
-    user.email = emailAsString;
-    user.verified = false;
-    // Generating an OTP
-    const token = '251TK8';
-    // Store the token on the user
-    user.token = token;
+    console.log(`[server '/login'] Sending email to user ${email} with OTP`);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: 'http://localhost:5173/token',
+        data: metadata,
+      }
+    });
+    
+    if (error) {
+      console.error(`[server '/login'] Sign in with OTP failed due to ${error}`);
+      return fail(500, { message: 'Server error. Try again later.', success: false, email });
+    }
 
-    cookies.set('sessionid', JSON.stringify(user));
+    console.log(`[server '/login'] Email sent to user ${email}, with nrn '${metadata?.nrn}'`);
 
-    // Send email with token
-    console.log(`Sending email to user ${email} with OTP`);
- 
-    // 303 — for form actions, following a successful submission
-    throw redirect(303, `/token${url.search}`);
+    cookies.set('email', email);
+
+    throw redirect(302, `/token?email=${encodeURIComponent(email)}`);
   },
 };

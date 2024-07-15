@@ -1,6 +1,5 @@
 <script>
   import { page } from '$app/stores';
-  import { subscription } from '$lib/stores/subscription';
   import { capitalize } from '$lib/utils';
 
   /** @type {import('./$types').LayoutData} */
@@ -8,16 +7,16 @@
 
   /** @type {(slug: string) => boolean} */
   $: isCompleted = (slug) => {
-    const index = data.forms.findIndex(form => form.slug === slug);
-    const steps = $subscription.completedSteps;
+    const index = data.forms.findIndex((form) => form.slug === slug);
+    const steps = [1, 2];
     return steps && steps.includes(index);
-  }
+  };
 
   /** @type {(slug: string) => string} */
   $: getSymbol = (slug) => {
     if (slug === $page.params.slug) return '●'; // ★
     return isCompleted(slug) ? '✓' : '';
-  }
+  };
 </script>
 
 <main class="card bg-base-100 shadow-lg">
@@ -29,7 +28,11 @@
 <div class="p-4 bg-base-100 text-base-content rounded-box shadow-lg">
   <ul class="steps steps-vertical">
     {#each data.forms as form}
-      <li data-content={getSymbol(form.slug)} class="step" class:step-primary={form.slug === $page.params.slug}>
+      <li
+        data-content={getSymbol(form.slug)}
+        class="step"
+        class:step-primary={form.slug === $page.params.slug}
+      >
         {#if isCompleted(form.slug)}
           <a href="/subscription/{form.slug}">{capitalize(form.slug)}</a>
         {:else}
